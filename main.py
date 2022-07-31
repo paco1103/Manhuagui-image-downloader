@@ -16,12 +16,15 @@ from requests_html import HTMLSession
 
 
 #Step 1: Get comic all charpter url
-def find_chapters_url(comic_url, roll_only=False):
+def find_chapters_url(session, comic_url, roll_only=False):
     chapters_obj_list = []
 
-    response = requests.get(comic_url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    response.close()
+    response = session.get(comic_url)
+    script = """
+        document.getElementById('checkAdult').click();
+    """
+    response.html.render(script=script, reload=True)
+    soup = BeautifulSoup(response.html.html, features='html.parser')
 
     comic_name = soup.select_one('.book-title h1').text
 
@@ -218,7 +221,7 @@ try:
 
             # get comic all chapter data
             print('start getting')
-            comic_name, chapters_obj_list = find_chapters_url(comic_url,
+            comic_name, chapters_obj_list = find_chapters_url(session, comic_url,
                                                             roll_only=roll_only)
 
             # print all chapter name
