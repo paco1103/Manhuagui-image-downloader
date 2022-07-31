@@ -25,6 +25,7 @@ def find_chapters_url(session, comic_url, roll_only=False):
     """
     response.html.render(script=script, reload=True)
     soup = BeautifulSoup(response.html.html, features='html.parser')
+    response.close()
 
     comic_name = soup.select_one('.book-title h1').text
 
@@ -48,6 +49,9 @@ def find_chapters_url(session, comic_url, roll_only=False):
                 'img_url_list': []
             }
             chapters_obj_list.append(details)
+
+    response.close()
+
     return comic_name, chapters_obj_list
 
 
