@@ -50,8 +50,6 @@ def find_chapters_url(session, comic_url, roll_only=False):
             }
             chapters_obj_list.append(details)
 
-    response.close()
-
     return comic_name, chapters_obj_list
 
 
@@ -62,7 +60,10 @@ def find_chapter_img_src(session, url, num_page):
     for image_idx in range(1, num_page + 1):
         #must use requests_html because of the ajax
         response = session.get(url + '#p=' + str(image_idx))
-        response.html.render()
+        script = """
+            document.getElementById('checkAdult').click();
+        """
+        response.html.render(script=script, reload=True)
 
         soup = BeautifulSoup(response.html.html, features='html.parser')
         img_tag = soup.select('#mangaBox img')
