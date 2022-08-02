@@ -19,13 +19,7 @@ from requests_html import HTMLSession
 def find_chapters_url(session, comic_url, roll_only=False):
     chapters_obj_list = []
 
-    response = session.get(comic_url)
-    script = """
-        document.getElementById('checkAdult').click();
-    """
-    response.html.render(script=script, reload=True)
-    soup = BeautifulSoup(response.html.html, features='html.parser')
-    response.close()
+    soup = get_soup(session, comic_url)
 
     comic_name = soup.select_one('.book-title h1').text
 
@@ -58,17 +52,8 @@ def find_chapter_img_src(session, url, num_page):
     img_url_list = []
 
     for image_idx in range(1, num_page + 1):
-        #must use requests_html because of the ajax
-        response = session.get(url + '#p=' + str(image_idx))
-        script = """
-            document.getElementById('checkAdult').click();
-        """
-        response.html.render(script=script, reload=True)
 
-        soup = BeautifulSoup(response.html.html, features='html.parser')
-        img_tag = soup.select('#mangaBox img')
-
-        response.close()
+        img_tag = get_soup(session, url + '#p=' + str(image_idx)).select('#mangaBox img')
 
         img_url_list.append(img_tag[0]['src'])
         print('Image url:' + str(image_idx) + '/' + str(num_page))
@@ -113,6 +98,30 @@ def save_img(img_dir_path, chapter):
 
     print('Chapter saving complete!')
     return download_page
+
+
+def get_soup(session, url):
+    #must use requests_html because of the ajax
+    response = session.get(url)
+    script = """
+        try {
+            document.getElementById('checkAdult').click();
+        } catch (error) {
+        }
+    """
+    response.html.render(script=script, reload=True)
+    response.close()
+    # try:
+       
+
+    # except Exception as e:
+    #     time.sleep(0.5,2)
+    #     response.html.render()
+    # finally:
+
+    soup = BeautifulSoup(response.html.html, features='html.parser')
+
+    return soup
 
 
 # TODO, modify to save from memory
